@@ -1,0 +1,92 @@
+<head>
+    <link rel="stylesheet" tydive="text/css" href="{{ url_for('static', filename='css/create_book.css') }}" />
+</head>
+
+{% extends "book.html" %}
+
+{% block book_jacket %}
+    <div>
+        {% block image %}{% endblock %}
+        <p>
+        {{ form.img.label }}<br>
+        {{ form.img(class="form-control") }}<br>
+        {% for error in form.img.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endfor %}
+        </p>
+    </div>
+{% endblock %}
+
+{% block book_name %}
+    <div>
+        {{ form.name.label }}<br>
+        {{ form.name(class="form-control") }}<br>
+        {% for error in form.name.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block book_author %}
+    <div>
+        {{ form.author.label }}<br>
+        {{ form.author(class="form-control") }}<br>
+        {% for error in form.author.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block book_intro %}
+    <div>
+        {{ form.intro.label }}<br>
+        {{ form.intro(class="form-control") }}<br>
+        {% for error in form.intro.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block book_genres %}
+    <div>
+        {{ form.genres.label }}<br>
+        <div class="scroll_div">
+            {% for option in form.genres %}
+                <input type="checkbox" id="{{ option.id }}" name="{{ form.genres.name }}" value="{{ option.data }}" {% if form.genres.data and option.data in form.genres.data %}checked{% endif %}>
+                <label for="{{ option.id }}">{{ option.label }}</label><br>
+            {% endfor %}
+        </div>
+        {% for error in form.genres.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block book_text %}
+    <div>
+        {{ form.text.label }} (txt)<br>
+        {{ form.text(class="form_control") }}<br>
+        {% for error in form.text.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endfor %}
+    </div>
+    <div>
+        {{ form.submit(type="submit", class="btn btn-primary") }}
+    </div>
+    <div>
+        {{ message }}
+    </div>
+    {% block text %}{% endblock %}
+{% endblock %}

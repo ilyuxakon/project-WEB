@@ -1,0 +1,17 @@
+<head>
+    <link rel="stylesheet" tydive="text/css" href="{{ url_for('static', filename='css/edit_book.css') }}" />
+</head>
+
+{% extends "create_book.html" %}
+
+{% block image %}
+    <div>
+        <img src="{{ params['img'] }}">
+    </div>
+{% endblock %}
+
+{% block text %}
+    <div>
+        {{ params['text']}}
+    </div>
+{% endblock %}

@@ -1,0 +1,134 @@
+<head>
+    <link rel="stylesheet" tydive="text/css" href="{{ url_for('static', filename='css/main.css') }}" />
+</head>
+
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container">
+        <div class="books_container">
+            {% if params['books'] %}
+                {% for book in params['books'] %}
+                    <div id="{{ book['id'] }}">
+                        <img src="{{ book['img'] }}">
+                        <div>
+                            <a href="{{ url_for('read_book', book_id=book['id']) }}"><h2>{{ book['name'] }}</h2></a>
+                            {% for genre in book['genres'] %}
+                                <p>{{ genre }}</p>
+                            {% endfor %}
+                            <p>{{ book['intro'] }}</p>
+                        </div>
+                        <div>
+                            {% if params['login_user'] %}
+                                {% if book['in_users_favorite_books'] %}
+                                    <a id="add_book_{{ book['id'] }}" class="btn btn-lg btn-outline-secondary" href="javascript:edit_users_books('{{ book['id'] }}')">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red" class="bi bi-heart-fill" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"/>
+                                        </svg>
+                                    </a>
+                                
+                                {% else %}
+                                    <a id="add_book_{{ book['id'] }}" class="btn btn-lg btn-outline-secondary" href="javascript:edit_users_books('{{ book['id'] }}')">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
+                                            <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15"/>
+                                        </svg>
+                                    </a>
+                                {% endif %}
+                            {% endif %}
+
+                            {% if book['user_id'] == params['user_id'] or params['status'] == 2 %}
+                                <a href="{{ url_for('edit_book', book_id=book['id']) }}">Редактировать</a>
+                                <a href="javascript:delete_book('{{ book['id'] }}', '{{ params['page'] }}')">Удалить</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+
+            {% else %}
+                <center><h2>Ничего не найдено</h2></center>
+
+            {% endif %}
+        </div>
+        {% if params['page'] == 3 %}
+            <a href="{{ url_for('create_book') }}">Добавить книгу</a>
+        {% endif %}
+        <div class="global_search_container">
+            <div class="search_container">
+                <form method="post">
+                    {{ search_form.hidden_tag() }}
+                    <p>
+                        {{ search_form.search.label }}<br>
+                        {{ search_form.search(class="form-control") }}<br>
+                        {% for error in search_form.search.errors %}
+                            <div class="alert alert-danger" role="alert">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    </p>
+                    <p>
+                        {{ search_form.submit2(type="submit", class="btn btn-primary") }}
+                    </p>
+                </form>
+            </div>
+            <div class="filter_container">
+                <form method="post">
+                    {{ filter_form.hidden_tag() }}
+                    <p>
+                        {{ filter_form.key_words.label }}<br>
+                        {{ filter_form.key_words(class="form-control") }}<br>
+                        {% for error in filter_form.key_words.errors %}
+                            <div class="alert alert-danger" role="alert">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    </p>
+                    <p>
+                        {{ filter_form.genres.label }}<br>
+                        <div class="scroll_div">
+                            {% for option in filter_form.genres %}
+                                <input type="checkbox" id="{{ option.id }}" name="{{ filter_form.genres.name }}" value="{{ option.data }}">
+                                <label for="{{ option.id }}">{{ option.label }}</label><br>
+                            {% endfor %}
+                        </div>
+                        {% for error in filter_form.genres.errors %}
+                            <div class="alert alert-danger" role="alert">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    </p>
+                    <p>
+                        {{ filter_form.author.label }}<br>
+                        {{ filter_form.author(class="form-control") }}<br>
+                        {% for error in filter_form.author.errors %}
+                            <div class="alert alert-danger" role="alert">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    </p>
+                    <p>
+                        {{ filter_form.submit1(type="submit", class="btn btn-primary") }}
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function delete_book(book_id, page) {
+            $.ajax({
+                url: '/delete_book',
+                method: 'post',
+                dataType: 'json',
+                data: {
+                    book_id: book_id,
+                },
+                success: function(data){
+                    if (data['success']) {
+                        elem = document.getElementById(book_id)
+                        elem.remove()
+                    }
+                }
+            });
+        }
+    </script>
+{% endblock %}

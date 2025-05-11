@@ -1,0 +1,44 @@
+{% extends "base_header.html" %}
+
+{% block header %}
+    <div class="all_books_btn">
+        <a href="{{ url_for('main_page', page=1) }}">Все книги</a>
+    </div>
+
+    {% if params['login_user'] %}
+        <div class="current_book_btn">
+            <a href="{{ url_for('current_book') }}">Читаю</a>
+        </div>
+        <div class="favorite_books_btn">
+            <a href="{{ url_for('main_page', page=2) }}">Избранное</a>
+        </div>
+        <div class="my_books_btn">
+            <a href="{{ url_for('main_page', page=3) }}">Мои книги</a>
+        </div>
+        <div class="finished_books_btn">
+            <a href="{{ url_for('main_page', page=4) }}">Прочитанные книги</a>
+        </div>
+    {% endif %}
+
+    {% if params['login_user'] %}
+        <div class="user">
+        {% if params['user_img'] %}
+        <img src="{{ params['user_img'] }}">
+        
+        {% else %}
+        <img src="{{ params['base_user_img'] }}">
+        
+        {% endif %}
+        
+        <p>{{ params['username'] }}</p>
+        <a href="{{ url_for('logout') }}">Выйти</a>
+        </div>
+            
+    {% else %}
+        <div class="user">
+            <img src="{{ params['base_user_img'] }}">
+            <a class="btn btn-primary" href="{{ url_for('login') }}">Авторизоваться</a>
+        </div>
+    {% endif %}
+
+{% endblock %}

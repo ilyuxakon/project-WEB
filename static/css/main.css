@@ -1,0 +1,4 @@
+.scroll_div{
+    overflow-y: scroll;
+    max-height: 180px;
+}
