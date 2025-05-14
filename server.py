@@ -320,6 +320,8 @@ def register():
                 return render_template('register.html', form=form, message='Эта почта уже используется', params=params)
 
             login_user(session.get(User, response['id']), remember=form.remember_me.data)
+            
+            # Сохраняет изображения пользователя в нужном размере в память сервера
             filename = 'static/img/profile_pictures/' + secure_filename(response['img'])
             form.img.data.save(filename)
             resize_file(filename, 64)
