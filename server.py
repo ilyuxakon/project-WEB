@@ -12,6 +12,8 @@ from flask_restful import Api
 
 from requests import post, get, put, delete
 
+import os
+
 from data import db_session, __all_models
 import users_resources
 import books_resources
@@ -378,4 +380,5 @@ def bad_request(_):
 
 
 if __name__ == '__main__':
-    app.run('127.0.0.1', 8080)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
