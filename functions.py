@@ -4,6 +4,7 @@ from flask import request
 from flask_login import current_user
 
 
+# Изменяет файл до размером size * size
 def resize_file(filename, size):
     image = Image.open(filename)
     width, height = image.size
@@ -23,6 +24,7 @@ def resize_file(filename, size):
     image.save(filename)
 
 
+# Возвращает базовые параметры для страниц
 def create_params():
     params = {
         'base_user_img': url_for('static', filename='img/profile_pictures/noname.jpg'),
@@ -44,6 +46,7 @@ def create_params():
     return params
 
 
+# Изменяет cookie текущей книги 
 def reset_current_book(res, book_id):
     res.set_cookie('book_id', str(book_id), max_age=60*60*24*365*2)
     res.set_cookie('page', '0', max_age=60*60*24*365)

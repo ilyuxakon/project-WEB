@@ -18,6 +18,16 @@ parser.add_argument('user_id')
 parser.add_argument('identifier')
 
 
+# requesting_user = session.query(User).filter(User.identifier == str(args['identifier'])).first()
+        
+# if requesting_user is None or\
+#    not (requesting_user.status == 2 or\
+#    book.user_id == requesting_user.id):
+#     return abort(403, message='no access')
+
+# В запросах изменяющих книгу должен присутствовать идентификатор пользователя, этот код проверяет имеет ли пользователь доступ для совершения действия 
+
+
 class BookResource(Resource):
     
     def get(self, book_id):

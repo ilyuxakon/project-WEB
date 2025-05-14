@@ -46,6 +46,7 @@ def main_page(page=1):
     search_form = Search_Form()
     books = session.query(Book)
 
+    # Начальный список книг
     if current_user.is_authenticated:
         if page == 2:
             books = books.filter(Book.id.in_([b.id for b in current_user.books]))
@@ -57,6 +58,7 @@ def main_page(page=1):
             books = books.filter(Book.id.in_([b.id for b in current_user.end_books]))
 
     if request.method == 'POST':
+        # Фильтрация книг по активным фильтрам
         if filter_form.validate_on_submit() and filter_form.submit1.data:
             key_words = filter_form.key_words.data
             genres = filter_form.genres.data
@@ -81,6 +83,7 @@ def main_page(page=1):
             if author is not None and author != '':
                 books = books.filter(Book.author.like(f'%{author.lower()}%'))
 
+        # Поиск книги по названию
         if search_form.validate_on_submit() and search_form.submit2.data:
             name = search_form.search.data
             books = books.filter(Book.name.like(f'%{name.lower()}%'))
@@ -88,6 +91,7 @@ def main_page(page=1):
     params = create_params()
     books_list = list()
 
+    # Параметры для страницы
     for book in books:
         books_list.append(
             {
@@ -127,10 +131,12 @@ def create_book():
             'identifier': current_user.identifier
             }).json()
 
+        # Сохраняет изображения пользователя в нужном размере в память сервера
         filename = 'static/img/book_jackets/' + secure_filename(response['img'])
         form.img.data.save(filename)
         resize_file(filename, 128)
 
+        # Сохраняет текст пользователя в память сервера
         filename = 'static/txt/' + secure_filename(response['text'])
         form.text.data.save(filename)
 
@@ -145,6 +151,7 @@ def edit_book(book_id):
     form = Edit_Book_Form()
     book = get(request.host_url + f'api/books/{book_id}').json()['book']
     
+    # Сработате при любой ошибке
     if 'message' in book:
         return redirect('/')
     
@@ -161,6 +168,7 @@ def edit_book(book_id):
             'identifier': current_user.identifier
         }
         
+        # Сохраняет изображения пользователя в нужном размере и заменяет старое в памяти сервера
         if form.img.data is not None:
             img = f'book_{book["id"]}_jacket.{form.img.data.filename.split(".")[-1]}'
             filename = 'static/img/book_jackets/' + secure_filename(img)
@@ -168,6 +176,7 @@ def edit_book(book_id):
             resize_file(filename, 128)
             json['img'] = img
 
+        # Сохраняет текст пользователя и заменяет старое в памяти сервера
         if form.text.data is not None:
             text = f'book_{book["id"]}_text.txt'
             filename = 'static/txt/' + secure_filename(text)
@@ -206,6 +215,7 @@ def read_book(book_id):
     response = get(request.host_url + f'api/books/{book_id}').json()
 
     if response:
+        # Сработате при любой ошибке
         if 'message' in response:
             return redirect('/')
         
@@ -221,6 +231,7 @@ def read_book(book_id):
         if current_user.is_authenticated:
             book['in_users_favorite_books'] = session.get(Book, book_id) in current_user.books
         
+        # Берёт цельный текст книги и делит на страницы по "WORD_COUNT" слов на каждой
         with open(f'static/txt/{book["text"]}', 'r', encoding='utf-8') as txt_file:
             text = txt_file.read()
             text = text.split()
@@ -235,6 +246,7 @@ def read_book(book_id):
         
         response = make_response(render_template('read_book.html', params=params, book=book))
 
+        # Если пользователь откроет новую книгу, она будет считаться текущей -> будут обновлены cookie
         if book_id != int(request.cookies.get('book_id', 0)):
             response = reset_current_book(response, book_id)
             
@@ -244,6 +256,7 @@ def read_book(book_id):
         return redirect('/')
 
 
+# Добавляет книгу в "Прочитанное" и возвращает на главную
 @app.route('/end_book/<int:book_id>')
 @login_required
 def end_book(book_id):
@@ -254,6 +267,7 @@ def end_book(book_id):
     return redirect('/')
 
 
+# Запоминает на какой странице остановился пользователь
 @app.route('/set_current_page/<int:page>', methods=['POST'])
 def set_current_page(page):
     response = make_response()
@@ -261,6 +275,7 @@ def set_current_page(page):
     return response
 
 
+# Перенаправляет на страницу последней книги которую читал пользователь 
 @app.route('/current_book')
 def current_book():
     book_id = int(request.cookies.get('book_id', 0))
@@ -316,6 +331,7 @@ def register():
     return render_template('register.html', form=form, params=params)
 
 
+# Меняет значение темы в cookie
 @app.route('/switch_theme', methods=['POST'])
 def switch_theme():
     theme = int(request.cookies.get("theme", 0))
@@ -325,6 +341,7 @@ def switch_theme():
     return res
 
 
+# Добавляет книгу в избранное или убирает её оттуда
 @app.route('/edit_users_books', methods=['POST'])
 def edit_users_books():
     args = request.form
