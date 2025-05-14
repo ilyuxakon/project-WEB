@@ -117,7 +117,7 @@ def create_book():
     form = Create_Book_Form()
 
     if form.validate_on_submit():
-        response = post(request.host_url + f'api/books', json={
+        response = post(request.host_url + 'api/books', json={
             'name': form.name.data,
             'author': form.author.data,
             'intro': form.intro.data,
@@ -162,14 +162,14 @@ def edit_book(book_id):
         }
         
         if form.img.data is not None:
-            img = f'book_{book['id']}_jacket.{form.img.data.filename.split('.')[-1]}'
+            img = f'book_{book["id"]}_jacket.{form.img.data.filename.split(".")[-1]}'
             filename = 'static/img/book_jackets/' + secure_filename(img)
             form.img.data.save(filename)
             resize_file(filename, 128)
             json['img'] = img
 
         if form.text.data is not None:
-            text = f'book_{book['id']}_text.txt'
+            text = f'book_{book["id"]}_text.txt'
             filename = 'static/txt/' + secure_filename(text)
             form.text.data.save(filename)
             json['text'] = text
@@ -193,7 +193,7 @@ def edit_book(book_id):
 @login_required
 def delete_book():
     args = request.form
-    response = delete(request.host_url + f'api/books/{args['book_id']}', json={'identifier': current_user.identifier}).json()
+    response = delete(request.host_url + f'api/books/{args["book_id"]}', json={'identifier': current_user.identifier}).json()
     if 'success' in response:
         return {'success': True}
     return {'success': False}
@@ -221,7 +221,7 @@ def read_book(book_id):
         if current_user.is_authenticated:
             book['in_users_favorite_books'] = session.get(Book, book_id) in current_user.books
         
-        with open(f'static/txt/{book['text']}', 'r', encoding='utf-8') as txt_file:
+        with open(f'static/txt/{book["text"]}', 'r', encoding='utf-8') as txt_file:
             text = txt_file.read()
             text = text.split()
             if len(text) <= WORD_COUNT:
