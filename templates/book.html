@@ -1,46 +1,55 @@
-<head>
-    <link rel="stylesheet" tydive="text/css" href="{{ url_for('static', filename='css/book.css') }}" />
-</head>
-
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="book">
-        <div class="container">
-            {% if form %}
-                <form method="post" enctype=multipart/form-data>
-                    {{ form.hidden_tag() }}
-            {% endif %}
-                <div class="book_jacket">
-                    {% block book_jacket %}{% endblock %}
-                </div>
-                <div class="book_name font_size">
-                    {% block book_name %}{% endblock %}
-                </div>
-                <div class="book_author font_size">
-                    {% block book_author %}{% endblock %}
-                </div>
-                <div class="book_intro font_size">
-                    {% block book_intro %}{% endblock %}
-                </div>
-                <div class="book_genres font_size">
-                    {% block book_genres %}{% endblock %}
-                </div>
-                <div class="book_text font_size">
+    <div class="row g-5">
+        <div class="col-md-2"></div>
+        
+        <div class="col-md-{% if book %}7{% else %}8{% endif %}">
+            <div class="container font_size">
+                {% if form %}
+                    <form method="post" enctype=multipart/form-data>
+                        {{ form.hidden_tag() }}
+                {% endif %}
+                    <div class="rounded border border-secondary-subtle">
+                        <div class="m-4">
+                            <div class="row my-4 mx-0">
+                                {% block book_jacket %}{% endblock %}
+
+                                {% block book_name %}{% endblock %}
+
+                                {% block book_author %}{% endblock %}
+                            </div>
+
+                            {% block book_genres %}{% endblock %}
+
+                            {% block book_intro %}{% endblock %}
+                        </div>
+                    
+                    {% if book %}
+                        </div>
+                    {% endif %}
+
                     {% block book_text %}{% endblock %}
-                </div>
-            {% if form %}
-                </form>
-            {% endif %}
-            <div class="control_button">
-                {% block control_buttons %}{% endblock %}
+                    
+                    {% if not book %}
+                        </div>
+                    {% endif %}
+
+                {% if form %}
+                    </form>
+                {% endif %}
             </div>
+
+            {% block pages_switch_buttons %}{% endblock %}
         </div>
-        <div>
-            {% block font_size_change %}{% endblock %}
+
+        <div {% if book %}class="col-md-1"{% endif %}>
+            <div class="position-sticky rounded bg-secondary bg-gradient" style="top: 2rem;"><center>
+                {% block font_size_change %}{% endblock %}
+            </center></div>
         </div>
+
+        <div class="col-md-2"></div>
     </div>
-    <div class="pages_switch_buttons">
-        {% block pages_switch_buttons %}{% endblock %}
-    </div>
+    <br><br>
 {% endblock %}

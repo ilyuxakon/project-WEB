@@ -36,7 +36,8 @@ class UserResource(Resource):
         requesting_user = session.query(User).filter(User.identifier == str(args['identifier'])).first()
         user = session.get(User, user_id)
         
-        if not (requesting_user.status == 2 or\
+        if requesting_user is None or\
+           not (requesting_user.status == 2 or\
            user.identifier == str(args['identifier'])):
             return abort(403, message='no access')
         
@@ -53,7 +54,8 @@ class UserResource(Resource):
         requesting_user = session.query(User).filter(User.identifier == str(args['identifier'])).first()
         user = session.get(User, user_id)
         
-        if not (requesting_user.status == 2 or\
+        if requesting_user is None or\
+           not (requesting_user.status == 2 or\
            user.identifier == str(args['identifier'])):
             return abort(403, message='no access')
         

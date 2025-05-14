@@ -4,41 +4,66 @@
 
 {% extends "base.html" %}
 
+{% block search %}
+        <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-5 d-flex" role="search" method="post">
+            {{ search_form.hidden_tag() }}
+            {{ search_form.search(class="form-control", Placeholder="Поиск...") }}
+            {{ search_form.submit2(class="btn btn-dark")}}
+        </form>
+{% endblock %}
+
 {% block content %}
-    <div class="container">
-        <div class="books_container">
+
+    <div class="row g-5">
+        <div class="col-md-2"></div>
+
+        <div class="col-md-5">
             {% if params['books'] %}
                 {% for book in params['books'] %}
-                    <div id="{{ book['id'] }}">
-                        <img src="{{ book['img'] }}">
-                        <div>
-                            <a href="{{ url_for('read_book', book_id=book['id']) }}"><h2>{{ book['name'] }}</h2></a>
+                    <br><br>
+                    <div id="{{ book['id'] }}" class="border border-secondary-subtle">
+                        <div class="row my-2 mx-0">
+                            <div class="col">
+                                <center><img src="{{ book['img'] }}"></center>
+                            </div>
+                            <div class="col">
+                                <a href="{{ url_for('read_book', book_id=book['id']) }}"><h2>{{ book['name'] }}</h2></a>
+                                <p>{{ book['author'] }}</p>
+                                <p>Опубликовал: {{ book['owner'] }}</p>
+                            </div>
+                        </div>
+                        <div class="pt-2 px-2">
                             {% for genre in book['genres'] %}
-                                <p>{{ genre }}</p>
+                                <p class="rounded bg-secondary bg-gradient px-2 text-white" style="display:inline-block">{{ genre }}</p>
                             {% endfor %}
+                        </div>
+                        <div class="px-2">
                             <p>{{ book['intro'] }}</p>
                         </div>
-                        <div>
+                        <div class="row m-2">
                             {% if params['login_user'] %}
                                 {% if book['in_users_favorite_books'] %}
-                                    <a id="add_book_{{ book['id'] }}" class="btn btn-lg btn-outline-secondary" href="javascript:edit_users_books('{{ book['id'] }}')">
+                                    <a id="add_book_{{ book['id'] }}" class="btn btn-lg btn-dark col-md-3" href="javascript:edit_users_books('{{ book['id'] }}')">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red" class="bi bi-heart-fill" viewBox="0 0 16 16">
                                             <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"/>
                                         </svg>
                                     </a>
                                 
                                 {% else %}
-                                    <a id="add_book_{{ book['id'] }}" class="btn btn-lg btn-outline-secondary" href="javascript:edit_users_books('{{ book['id'] }}')">
+                                    <a id="add_book_{{ book['id'] }}" class="btn btn-lg btn-dark col-md-3" href="javascript:edit_users_books('{{ book['id'] }}')">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
                                             <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15"/>
                                         </svg>
                                     </a>
-                                {% endif %}
+                                    {% endif %}
+                                <div class="col-md-1"></div>
                             {% endif %}
 
-                            {% if book['user_id'] == params['user_id'] or params['status'] == 2 %}
-                                <a href="{{ url_for('edit_book', book_id=book['id']) }}">Редактировать</a>
-                                <a href="javascript:delete_book('{{ book['id'] }}', '{{ params['page'] }}')">Удалить</a>
+                            {% if book['user_id'] == params['user_id'] or params['user_status'] == 2 %}
+                                <a href="{{ url_for('edit_book', book_id=book['id']) }}" class="col-md-4 btn btn-dark">Редактировать</a>
+                                <div class="col-md-1"></div>
+                                <a href="javascript:delete_book('{{ book['id'] }}')" class="col-md-3 btn btn-dark">Удалить</a>
+                                <div class="col-md-1"></div>
                             {% endif %}
                         </div>
                     </div>
@@ -49,33 +74,18 @@
 
             {% endif %}
         </div>
-        {% if params['page'] == 3 %}
-            <a href="{{ url_for('create_book') }}">Добавить книгу</a>
-        {% endif %}
-        <div class="global_search_container">
-            <div class="search_container">
-                <form method="post">
-                    {{ search_form.hidden_tag() }}
-                    <p>
-                        {{ search_form.search.label }}<br>
-                        {{ search_form.search(class="form-control") }}<br>
-                        {% for error in search_form.search.errors %}
-                            <div class="alert alert-danger" role="alert">
-                                {{ error }}
-                            </div>
-                        {% endfor %}
-                    </p>
-                    <p>
-                        {{ search_form.submit2(type="submit", class="btn btn-primary") }}
-                    </p>
-                </form>
-            </div>
-            <div class="filter_container">
-                <form method="post">
+        
+        <div class="col-md-4">
+            <div class="position-sticky" style="top: 2rem;">
+                {% if params['login_user'] %}
+                    <a href="{{ url_for('create_book') }}"  class="btn btn-dark">Добавить книгу</a>
+                    <br><br>
+                {% endif %}
+                <form method="post" class="p-4 mb-3 rounded bg-secondary bg-gradient">
                     {{ filter_form.hidden_tag() }}
                     <p>
-                        {{ filter_form.key_words.label }}<br>
-                        {{ filter_form.key_words(class="form-control") }}<br>
+                        {{ filter_form.key_words.label(class="text-white") }}<br>
+                        {{ filter_form.key_words(class="form-control text-dark") }}<br>
                         {% for error in filter_form.key_words.errors %}
                             <div class="alert alert-danger" role="alert">
                                 {{ error }}
@@ -83,11 +93,11 @@
                         {% endfor %}
                     </p>
                     <p>
-                        {{ filter_form.genres.label }}<br>
+                        {{ filter_form.genres.label(class="text-white") }}<br>
                         <div class="scroll_div">
                             {% for option in filter_form.genres %}
                                 <input type="checkbox" id="{{ option.id }}" name="{{ filter_form.genres.name }}" value="{{ option.data }}">
-                                <label for="{{ option.id }}">{{ option.label }}</label><br>
+                                <label for="{{ option.id }}">{{ option.label(class="text-white") }}</label><br>
                             {% endfor %}
                         </div>
                         {% for error in filter_form.genres.errors %}
@@ -97,8 +107,8 @@
                         {% endfor %}
                     </p>
                     <p>
-                        {{ filter_form.author.label }}<br>
-                        {{ filter_form.author(class="form-control") }}<br>
+                        {{ filter_form.author.label(class="text-white") }}<br>
+                        {{ filter_form.author(class="form-control text-dark") }}<br>
                         {% for error in filter_form.author.errors %}
                             <div class="alert alert-danger" role="alert">
                                 {{ error }}
@@ -106,15 +116,17 @@
                         {% endfor %}
                     </p>
                     <p>
-                        {{ filter_form.submit1(type="submit", class="btn btn-primary") }}
+                        {{ filter_form.submit1(type="submit", class="btn btn-dark") }}
                     </p>
                 </form>
             </div>
         </div>
+
+        <div class="col-md-1"></div>
     </div>
 
     <script>
-        function delete_book(book_id, page) {
+        function delete_book(book_id) {
             $.ajax({
                 url: '/delete_book',
                 method: 'post',

@@ -1,44 +1,35 @@
 {% extends "base_header.html" %}
 
 {% block header %}
-    <div class="all_books_btn">
-        <a href="{{ url_for('main_page', page=1) }}">Все книги</a>
-    </div>
+    <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+        <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-dark text-decoration-none">
+            <img class="bi me-2" src="{{ url_for('static', filename='img/main_image.jpg')}}">
+        </a>
 
-    {% if params['login_user'] %}
-        <div class="current_book_btn">
-            <a href="{{ url_for('current_book') }}">Читаю</a>
-        </div>
-        <div class="favorite_books_btn">
-            <a href="{{ url_for('main_page', page=2) }}">Избранное</a>
-        </div>
-        <div class="my_books_btn">
-            <a href="{{ url_for('main_page', page=3) }}">Мои книги</a>
-        </div>
-        <div class="finished_books_btn">
-            <a href="{{ url_for('main_page', page=4) }}">Прочитанные книги</a>
-        </div>
-    {% endif %}
+        <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+            <li><a href="{{ url_for('main_page', page=1) }}" class="theme-dependent nav-link px-2 link-{% if params['page'] == 1 %}secondary{% else %}{% if params['theme'] == 'dark-theme' %}light{% else %}dark{% endif %}{% endif %}">Все книги</a></li>
+            {% if params['login_user'] %}
+                <li><a href="{{ url_for('current_book') }}" class="theme-dependent nav-link px-2 link-{% if params['page'] == 0 %}secondary{% else %}{% if params['theme'] == 'dark-theme' %}light{% else %}dark{% endif %}{% endif %}">Читаю</a></li>
+                <li><a href="{{ url_for('main_page', page=2) }}" class="theme-dependent nav-link px-2 link-{% if params['page'] == 2 %}secondary{% else %}{% if params['theme'] == 'dark-theme' %}light{% else %}dark{% endif %}{% endif %}">Избранное</a></li>
+                <li><a href="{{ url_for('main_page', page=3) }}" class="theme-dependent nav-link px-2 link-{% if params['page'] == 3 %}secondary{% else %}{% if params['theme'] == 'dark-theme' %}light{% else %}dark{% endif %}{% endif %}">Мои книги</a></li>
+                <li><a href="{{ url_for('main_page', page=4) }}" class="theme-dependent nav-link px-2 link-{% if params['page'] == 4 %}secondary{% else %}{% if params['theme'] == 'dark-theme' %}light{% else %}dark{% endif %}{% endif %}">Прочитанные книги</a></li>
+            {% endif %}
+        </ul>
 
-    {% if params['login_user'] %}
-        <div class="user">
-        {% if params['user_img'] %}
-        <img src="{{ params['user_img'] }}">
+        {% block search %}{% endblock %}
         
-        {% else %}
-        <img src="{{ params['base_user_img'] }}">
-        
-        {% endif %}
-        
-        <p>{{ params['username'] }}</p>
-        <a href="{{ url_for('logout') }}">Выйти</a>
+        <div class="dropdown text-end">
+            <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                <img src="{% if params['login_user'] %}{{ params['user_img'] }}{% else %}{{ params['base_user_img'] }}{% endif %}" alt="mdo" width="32" height="32" class="rounded-circle">
+            </a>
+            <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1">
+                {% if params['login_user'] %}
+                    <li><p class="dropdown-item">{{ params['username'] }}</p></li>
+                    <li><a class="dropdown-item" href="{{ url_for('logout') }}">Выйти</a></li>
+                {% else %}
+                    <li><p class="dropdown-item">Пользователь</p></li>
+                    <li><a class="dropdown-item btn btn-primary" href="{{ url_for('login') }}">Авторизоваться</a></li>
+                {% endif %}
+            </ul>
         </div>
-            
-    {% else %}
-        <div class="user">
-            <img src="{{ params['base_user_img'] }}">
-            <a class="btn btn-primary" href="{{ url_for('login') }}">Авторизоваться</a>
-        </div>
-    {% endif %}
-
 {% endblock %}

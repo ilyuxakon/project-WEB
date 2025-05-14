@@ -1,27 +1,22 @@
 from flask import Flask
 from flask import request
-from flask import render_template, redirect, make_response, jsonify, url_for, abort
+from flask import render_template, redirect, make_response, jsonify, url_for
 
-from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileRequired
-from wtforms import StringField, PasswordField, SubmitField, EmailField, BooleanField, SelectMultipleField
-from wtforms.validators import DataRequired
 from werkzeug.utils import secure_filename
 
 from flask_login import LoginManager
 from flask_login import current_user
 from flask_login import login_user, login_required, logout_user
 
-from flask_restful import Api, reqparse
+from flask_restful import Api
 
 from requests import post, get, put, delete
-
-from PIL import Image
 
 from data import db_session, __all_models
 import users_resources
 import books_resources
-
+from classes import *
+from functions import *
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'qwertyuiop'
@@ -41,97 +36,6 @@ User, Book, Genre = __all_models.users.User, __all_models.books.Book, __all_mode
 
 WORD_COUNT = 100
 
-class Filter_Form(FlaskForm):
-    key_words = StringField('Ключевые слова')
-    genres_list = [genre.name for genre in session.query(Genre)]
-    genres = SelectMultipleField('Жанры', choices=genres_list, default=1)
-    author = StringField('Автор')
-    submit1 = SubmitField('Поиск')
-
-
-class Search_Form(FlaskForm):
-    search = StringField('Поиск')
-    submit2 = SubmitField('Поиск')
-
-
-class Login_Form(FlaskForm):
-    email = EmailField('Email', validators=[DataRequired()])
-    password = PasswordField('Пароль', validators=[DataRequired()])
-    remember_me = BooleanField('Запомнить меня')
-    submit = SubmitField('Войти')
-
-
-class Register_Form(FlaskForm):
-    email = EmailField('Email', validators=[DataRequired()])
-    password = PasswordField('Пароль', validators=[DataRequired()])
-    repeat_password = PasswordField('Повторите пароль', validators=[DataRequired()])
-    nickname = StringField('Имя', validators=[DataRequired()])
-    img = FileField('Аватар')
-    remember_me = BooleanField('Запомнить меня')
-    submit = SubmitField('Войти')
-
-
-class Create_Book_Form(FlaskForm):
-    name = StringField('Название книги', validators=[DataRequired()])
-    author = StringField('Автор книги', validators=[DataRequired()])
-    intro = StringField('Описание книги', validators=[DataRequired()])
-    genres_list = [genre.name for genre in session.query(Genre)]
-    genres = SelectMultipleField('Жанры книги', choices=genres_list, default=1, validators=[DataRequired()])
-    text = FileField('Файл с текстом', validators=[FileRequired()])
-    img = FileField('Обложка книги', validators=[FileRequired()])
-    submit = SubmitField('Создать')
-
-
-class Edit_Book_Form(Create_Book_Form):
-    text = FileField('Файл с текстом')
-    img = FileField('Обложка книги')
-
-
-def resize_file(filename, size):
-    image = Image.open(filename)
-    width, height = image.size
-    
-    if height <= width:
-        image.thumbnail((int(size * width / height), size))
-    
-    else:
-        image.thumbnail(size, int(size, int(size * height / width)))
-        
-    width = image.size[0]
-    x0, x1 = 0, size
-    if width > size:
-        x0 = (width - size) // 2
-        x1 = (width - size) // 2 + size
-    image = image.crop((x0, 0, x1, size))
-    image.save(filename)
-
-
-def create_params():
-    params = {
-        'base_user_img': url_for('static', filename='img/profile_pictures/noname.jpg'),
-        'login_user': False,
-        'theme': 'light-theme'
-    }
-
-    if current_user.is_authenticated:
-        params['username'] = current_user.nickname
-        params['login_user'] = True
-        params['user_id'] = current_user.id
-        params['user_status'] = current_user.status
-        if current_user is not None:
-            params['user_img'] = url_for('static', filename='img/profile_pictures/' + current_user.img)
-    
-    if int(request.cookies.get("theme", 0)):
-        params['theme'] = 'dark-theme'    
-    
-    return params
-
-
-def reset_current_book(res, book_id):
-    res.set_cookie('book_id', str(book_id), max_age=60*60*24*365*2)
-    res.set_cookie('page', '0', max_age=60*60*24*365)
-    return res
-
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/<int:page>', methods=['GET', 'POST'])
@@ -142,13 +46,13 @@ def main_page(page=1):
 
     if current_user.is_authenticated:
         if page == 2:
-            books = current_user.books
+            books = books.filter(Book.id.in_([b.id for b in current_user.books]))
 
         elif page == 3:
-            books = current_user.own_books
+            books = books.filter(Book.id.in_([b.id for b in current_user.own_books]))
             
         elif page == 4:
-            books = current_user.end_books
+            books = books.filter(Book.id.in_([b.id for b in current_user.end_books]))
 
     if request.method == 'POST':
         if filter_form.validate_on_submit() and filter_form.submit1.data:
@@ -187,10 +91,12 @@ def main_page(page=1):
             {
                 'img': url_for('static', filename='img/book_jackets/' + book.img),
                 'name': book.name,
+                'author': book.author,
                 'genres': [genre.name for genre in book.genres],
                 'intro': book.intro,
                 'id': book.id,
                 'user_id': book.user_id,
+                'owner': book.user.nickname
             }
         )
         if current_user.is_authenticated:
@@ -226,9 +132,9 @@ def create_book():
         filename = 'static/txt/' + secure_filename(response['text'])
         form.text.data.save(filename)
 
-        return render_template('create_book.html', form=form, params=params, message='Книга добавлена в библиотеку')
+        return render_template('create_book.html', form=form, params=params, book=False, message='Книга добавлена в библиотеку')
 
-    return render_template('create_book.html', form=form, params=params)
+    return render_template('create_book.html', form=form, params=params, book=False)
 
 
 @app.route('/edit_book/<int:book_id>', methods=['POST', 'GET'])
@@ -242,9 +148,6 @@ def edit_book(book_id):
     
     params = create_params()
     params['img'] = url_for('static', filename='img/book_jackets/' + book['img'])
-    with open(f'static/txt/{book['text']}', 'r', encoding='utf-8') as txt_file:
-            text = txt_file.read()
-            params['text'] = text
 
     if form.validate_on_submit():
         json={
@@ -272,7 +175,7 @@ def edit_book(book_id):
         response = put(request.host_url + f'api/books/{book_id}', json=json).json()
 
         if 'id' in response:
-            return render_template('edit_book.html', form=form, params=params, message='Книга обновлена')
+            return render_template('edit_book.html', form=form, params=params, book=False, message='Книга обновлена')
 
     else:
         form.name.data = book['name']
@@ -281,7 +184,7 @@ def edit_book(book_id):
         img = url_for('static', filename='img/book_jackets/' + book['img'])
         form.genres.data = [genre.name for genre in session.query(Genre).filter(Genre.id.in_(book['genres'])).all()]
 
-    return render_template('edit_book.html', form=form, params=params)
+    return render_template('edit_book.html', form=form, params=params, book=False)
 
 
 @app.route('/delete_book', methods=['POST'])
@@ -297,6 +200,7 @@ def delete_book():
 @app.route('/read/<int:book_id>')
 def read_book(book_id):
     params = create_params()
+    params['page'] = 0
     response = get(request.host_url + f'api/books/{book_id}').json()
 
     if response:
@@ -313,7 +217,7 @@ def read_book(book_id):
             book['page'] = int(request.cookies.get('page', 0))
         
         if current_user.is_authenticated:
-            book['in_users_favorite_books'] = book in current_user.books
+            book['in_users_favorite_books'] = session.get(Book, book_id) in current_user.books
         
         with open(f'static/txt/{book['text']}', 'r', encoding='utf-8') as txt_file:
             text = txt_file.read()
@@ -395,7 +299,7 @@ def register():
                 }).json()
 
             if 'message' in response and response['message'] == 'Email Error':
-                return render_template('register.html', form=form, message='Эта почта уже используется')
+                return render_template('register.html', form=form, message='Эта почта уже используется', params=params)
 
             login_user(session.get(User, response['id']), remember=form.remember_me.data)
             filename = 'static/img/profile_pictures/' + secure_filename(response['img'])

@@ -9,7 +9,7 @@
         {% block image %}{% endblock %}
         <p>
         {{ form.img.label }}<br>
-        {{ form.img(class="form-control") }}<br>
+        {{ form.img(class="form-control") }}
         {% for error in form.img.errors %}
             <div class="alert alert-danger" role="alert">
                 {{ error }}
@@ -22,7 +22,7 @@
 {% block book_name %}
     <div>
         {{ form.name.label }}<br>
-        {{ form.name(class="form-control") }}<br>
+        {{ form.name(class="form-control") }}
         {% for error in form.name.errors %}
             <div class="alert alert-danger" role="alert">
                 {{ error }}
@@ -34,7 +34,7 @@
 {% block book_author %}
     <div>
         {{ form.author.label }}<br>
-        {{ form.author(class="form-control") }}<br>
+        {{ form.author(class="form-control") }}
         {% for error in form.author.errors %}
             <div class="alert alert-danger" role="alert">
                 {{ error }}
@@ -45,8 +45,9 @@
 
 {% block book_intro %}
     <div>
-        {{ form.intro.label }}<br>
-        {{ form.intro(class="form-control") }}<br>
+        <br>
+        {{ form.intro.label }}
+        {{ form.intro(class="form-control") }}
         {% for error in form.intro.errors %}
             <div class="alert alert-danger" role="alert">
                 {{ error }}
@@ -73,20 +74,21 @@
 {% endblock %}
 
 {% block book_text %}
-    <div>
-        {{ form.text.label }} (txt)<br>
-        {{ form.text(class="form_control") }}<br>
-        {% for error in form.text.errors %}
-            <div class="alert alert-danger" role="alert">
-                {{ error }}
-            </div>
-        {% endfor %}
+    <div class="mx-4">
+        <div>
+            {{ form.text.label }} (txt)<br>
+            {{ form.text(class="form_control") }}
+            {% for error in form.text.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+        <div class="my-4">
+            {{ form.submit(type="submit", class="btn btn-dark") }}
+        </div>
+        <div>
+            {{ message }}
+        </div>
     </div>
-    <div>
-        {{ form.submit(type="submit", class="btn btn-primary") }}
-    </div>
-    <div>
-        {{ message }}
-    </div>
-    {% block text %}{% endblock %}
 {% endblock %}

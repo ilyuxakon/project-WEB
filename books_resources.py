@@ -27,6 +27,7 @@ class BookResource(Resource):
         d = book.to_dict(
             only=('name', 'img', 'text', 'intro', 'author', 'user_id'))
         d['genres'] = [genre.id for genre in book.genres]
+        d['owner'] = book.user.nickname
         return jsonify({'book': d})
 
     def delete(self, book_id):
@@ -36,7 +37,8 @@ class BookResource(Resource):
         requesting_user = session.query(User).filter(User.identifier == str(args['identifier'])).first()
         book = session.get(Book, book_id)
         
-        if not (requesting_user.status == 2 or\
+        if requesting_user is None or\
+           not (requesting_user.status == 2 or\
            book.user_id == requesting_user.id):
             return abort(403, message='no access')
         
@@ -53,7 +55,8 @@ class BookResource(Resource):
         requesting_user = session.query(User).filter(User.identifier == str(args['identifier'])).first()
         book = session.get(Book, book_id)
         
-        if not (requesting_user.status == 2 or\
+        if requesting_user is None or\
+           not (requesting_user.status == 2 or\
            book.user_id == requesting_user.id):
             return abort(403, message='no access')
         
@@ -98,7 +101,8 @@ class BooksListResource(Resource):
         session = db_session.create_session()
         requesting_user = session.query(User).filter(User.identifier == str(args['identifier'])).first()
         
-        if requesting_user.status == 0:
+        if requesting_user is None or\
+           requesting_user.status == 0:
             return abort(403, message='no access')
         
         try:

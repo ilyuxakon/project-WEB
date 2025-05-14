@@ -5,13 +5,18 @@
 {% extends "base_header.html" %}
 
 {% block header %}
-    <a href="{{ url_for('register') }}">Зарегистрироваться</a>
-    <a href="{{ url_for('main_page', page=1) }}">Остаться неавторизованным</a>
+    <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+        <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+            <li><a href="{{ url_for('register') }}" class="theme-dependent nav-link px-2 link-{% if params['theme'] == 'dark-theme' %}light{% else %}dark{% endif %}">Зарегистрироваться</a></li>
+            <li><a href="{{ url_for('main_page', page=1) }}" class="theme-dependent nav-link px-2 link-{% if params['theme'] == 'dark-theme' %}light{% else %}dark{% endif %}">Остаться неавторизованным</a></li>
+        </ul>
 {% endblock %}
 
 {% block content %}
     <center><form method="post" class="login_form">
         {{ form.hidden_tag() }}
+        <img class="mb-4" src="{{ url_for('static', filename='img/main_image.jpg')}}" alt="">
+        <h1 class="h3 mb-3 fw-normal">Пожалуйста, войдите</h1>
         <p>
             {{ form.email.label }}<br>
             {{ form.email(class="form-control", type="email") }}<br>
@@ -32,6 +37,5 @@
         </p>
         <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
         <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
-        <div>{{ message }}</div>
     </form></center>
 {% endblock %}
