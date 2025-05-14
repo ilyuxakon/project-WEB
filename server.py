@@ -248,8 +248,9 @@ def read_book(book_id):
 @login_required
 def end_book(book_id):
     book = session.get(Book, book_id)
-    current_user.end_books.append(book)
-    session.commit()
+    if book not in current_user.end_books:
+        current_user.end_books.append(book)
+        session.commit()
     return redirect('/')
 
 
