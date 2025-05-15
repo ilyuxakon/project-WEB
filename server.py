@@ -345,6 +345,7 @@ def switch_theme():
 
 # Добавляет книгу в избранное или убирает её оттуда
 @app.route('/edit_users_books', methods=['POST'])
+@login_required
 def edit_users_books():
     args = request.form
     book = session.get(Book, args['book_id'])

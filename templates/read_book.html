@@ -3,6 +3,7 @@
         var current_page = Number("{{ book['page'] }}")
         var pages = {{ book['text']|tojson }}
         var book_len = Number("{{ book['book_len'] }}")
+        var login_user = params['login_user']
      </script>
          <script>
             for (let i = 1; i <= current_page; i++) {
@@ -151,8 +152,10 @@
                 block = document.getElementById("forward")
                 block.innerHTML = ' '
 
-                block = document.getElementById("end_book")
-                block.innerHTML = "<a href='{{ url_for('end_book', book_id=book['id']) }}' class='btn btn-lg btn-dark'>Закончить</a>"
+                if (login_user) {
+                    block = document.getElementById("end_book")
+                    block.innerHTML = "<a href='{{ url_for('end_book', book_id=book['id']) }}' class='btn btn-lg btn-dark'>Закончить</a>"
+                }
             }
             $.ajax({
                 url: '/set_current_page/' + String(current_page),
