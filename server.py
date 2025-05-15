@@ -15,10 +15,10 @@ from requests import post, get, put, delete
 import os
 
 from data import db_session, __all_models
-import users_resources
-import books_resources
-from classes import *
-from functions import *
+import py.users_resources as users_resources
+import py.books_resources as books_resources
+from py.classes import *
+from py.functions import *
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'qwertyuiop'
